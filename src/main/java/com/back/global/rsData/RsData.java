@@ -1,4 +1,4 @@
 package com.back.global.rsData;
 
-public record RsData(String resultCode, String ms, Object data) {
+public record RsData<T>(String resultCode, String ms, T data) {
 }
