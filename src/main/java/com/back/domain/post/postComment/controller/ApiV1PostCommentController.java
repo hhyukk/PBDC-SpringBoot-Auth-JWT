@@ -72,7 +72,7 @@ public class ApiV1PostCommentController {
     ) {
     }
 
-    @PutMapping("/[id}")
+    @PutMapping("/{id}")
     @Transactional
     public RsData<Void> modify(
             @PathVariable int postId,
