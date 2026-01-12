@@ -48,7 +48,6 @@ public class ApiV1PostControllerTest {
                 .andDo(print()); // 응답 결과 출력
 
         Post post = postService.findLatest().get();
-        long totalCount = postService.count();
         // 201 Created 상태코드 검증
         resultActions
                 .andExpect(handler().handlerType(ApiV1PostController.class))
