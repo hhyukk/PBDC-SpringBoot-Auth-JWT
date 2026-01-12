@@ -93,8 +93,8 @@ public class ApiV1PostControllerTest {
 
     @Test
     @DisplayName("글 삭제")
-    void t3() throws Exception{
-        int id=1;
+    void t3() throws Exception {
+        int id = 1;
 
         ResultActions resultActions = mvc
                 .perform(
@@ -107,6 +107,29 @@ public class ApiV1PostControllerTest {
                 .andExpect(handler().handlerType(ApiV1PostController.class))
                 .andExpect(handler().methodName("delete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"));
+    }
+
+    @Test
+    @DisplayName("글 단건조회")
+    void t4() throws Exception {
+        int id = 1;
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts/" + id)
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(status().isOk());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("getItem"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.createDate").isString())
+                .andExpect(jsonPath("$.modifyDate").isString())
+                .andExpect(jsonPath("$.title").isString())
+                .andExpect(jsonPath("$.content").isString());
     }
 }
