@@ -61,7 +61,7 @@ public class ApiV1PostCommentController {
 
         return new RsData<>(
                 "200-1",
-                "%d번댓글이 삭제되었습니다.".formatted(id)
+                "%d번 댓글이 삭제되었습니다.".formatted(id)
         );
     }
 
@@ -88,6 +88,30 @@ public class ApiV1PostCommentController {
         return new RsData<>(
                 "200-1",
                 "%d번 댓글이 수정되었습니다.".formatted(id)
+        );
+    }
+
+    record PostCommentWriteReqBody(
+            @NotBlank
+            @Size(min = 2, max = 100)
+            String content
+    ) {
+    }
+
+    @PostMapping
+    @Transactional
+    public RsData<PostCommentDto> write(
+            @PathVariable int postId,
+            @Valid @RequestBody PostCommentWriteReqBody reqBody
+    ) {
+        Post post = postService.findById(postId).get();
+
+        PostComment postComment = postService.writeComment(post, reqBody.content);
+
+        return new RsData<>(
+                "201-1",
+                "%d번 댓글이 작성되었습니다.".formatted(postComment.getId()),
+                new PostCommentDto(postComment)
         );
     }
 }
