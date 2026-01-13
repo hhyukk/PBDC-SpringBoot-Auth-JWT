@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
                 .filter(error -> error instanceof FieldError)
                 .map(error -> (FieldError) error)
                 .map(error -> error.getField() + "-" + error.getCode() + "-" + error.getDefaultMessage())
-                .sorted(Comparator.comparing(String::toString))
+                .sorted(Comparator.comparing(String::toString)) // 이 코드는 `.sorted()` 와 작동결과가 같다, 역순 정렬할 의도가 아니라면 그냥 `sorted()` 사용하자
                 .collect(Collectors.joining("\n"));
 
         return new ResponseEntity<>(
