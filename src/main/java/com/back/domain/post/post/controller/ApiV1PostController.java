@@ -8,13 +8,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController // @Controller + @ResponseBody
 @RequestMapping("/api/v1/posts")
@@ -22,7 +21,7 @@ import java.util.Map;
 public class ApiV1PostController {
     private final PostService postService;
 
-    @GetMapping
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     @Transactional(readOnly = true)
     public List<PostDto> getItems() {
         List<Post> items = postService.findAll();
@@ -32,7 +31,7 @@ public class ApiV1PostController {
                 .toList();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
     @Transactional(readOnly = true)
     public PostDto getItem(@PathVariable int id) {
         Post post = postService.findById(id).get();
