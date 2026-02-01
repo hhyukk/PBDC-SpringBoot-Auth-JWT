@@ -1,6 +1,7 @@
 package com.back.global.globalExceptionHandler;
 
 import com.back.global.rsData.RsData;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -27,6 +28,32 @@ public class GlobalExceptionHandler {
                         "해당 데이터가 존재하지 않습니다."
                 ),
                 NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<RsData<Void>> handle(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations()
+                .stream()
+                .map(violation -> {
+                    // getPropertyPath: 검증 오류가 발생한 정확한 필드 경로
+                    String field = violation.getPropertyPath().toString().split("\\.", 2)[1];
+                    // getMessageTemplate: 검증 실패 시 사용된 메시지 템플릿 원본 문자열을 반환
+                    String[] messageTemplateBits = violation.getMessageTemplate().split("\\.");
+                    String code = messageTemplateBits[messageTemplateBits.length - 2];
+                    String _message = violation.getMessage();
+
+                    return "%s-%s-%s".formatted(field, code, _message);
+                })
+                .sorted(Comparator.comparing(String::toString))
+                .collect(Collectors.joining("\n"));
+
+        return new ResponseEntity<>(
+                new RsData<>(
+                        "400-1",
+                        message
+                ),
+                BAD_REQUEST
         );
     }
 
