@@ -1,5 +1,7 @@
 package com.back.domain.post.post.controller;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import org.hamcrest.Matchers;
@@ -16,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,15 +31,20 @@ public class ApiV1PostControllerTest {
     private MockMvc mvc; // MockMvc를 주입
     @Autowired
     private PostService postService;
+    @Autowired
+    private MemberService memberService;
 
     //회원가입 테스트
     @Test
     @DisplayName("글 쓰기")
     void t1() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
+
         // 회원가입 요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts")
+                        post("/api/v1/posts?apiKey=" + actorApiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
