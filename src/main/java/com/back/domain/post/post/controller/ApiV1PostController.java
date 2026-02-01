@@ -13,11 +13,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController // @Controller + @ResponseBody
+@Validated
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
 @Tag(name = "ApiV1PostController", description = "API 글 컨트롤러")
@@ -73,8 +75,11 @@ public class ApiV1PostController {
     @PostMapping
     @Transactional
     @Operation(summary = "작성")
-    public RsData<PostDto> write(@Valid @RequestBody PostWriteReqBody reqBody) {
-        Member actor = memberService.findByUsername("user1").get(); // 임시로 작성자를 user1으로 지정
+    public RsData<PostDto> write(
+            @Valid @RequestBody PostWriteReqBody reqBody,
+            @NotBlank @Size(min = 2, max = 30) String username
+    ) {
+        Member actor = memberService.findByUsername(username).get(); // 임시로 작성자를 user1으로 지정
         Post post = postService.write(actor, reqBody.title, reqBody.content);
 
         return new RsData<>(
