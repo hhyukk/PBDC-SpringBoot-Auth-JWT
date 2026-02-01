@@ -1,5 +1,6 @@
 package com.back.global.globalExceptionHandler;
 
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -84,6 +85,14 @@ public class GlobalExceptionHandler {
                         "400-1",
                         "요청 본문이 올바르지 않습니다."
                 ),
+                BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(ServiceException.class)
+    public ResponseEntity<RsData<Void>> handle(ServiceException ex) {
+        return new ResponseEntity<>(
+                ex.getRsData(),
                 BAD_REQUEST
         );
     }
