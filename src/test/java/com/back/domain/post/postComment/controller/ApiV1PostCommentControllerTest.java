@@ -97,9 +97,15 @@ public class ApiV1PostCommentControllerTest {
         int postId = 1;
         int id = 1;
 
+        Post post = postService.findById(postId).get();
+        PostComment postComment = post.findCommentById(id).get();
+        Member actor = postComment.getAuthor();
+        String actorApiKey = actor.getApiKey();
+
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                                .header("Authorization", "Bearer " + actorApiKey)
                 )
                 .andDo(print());
 
@@ -117,9 +123,15 @@ public class ApiV1PostCommentControllerTest {
         int postId = 1;
         int id = 1;
 
+        Post post = postService.findById(postId).get();
+        PostComment postComment = post.findCommentById(id).get();
+        Member actor = postComment.getAuthor();
+        String actorApiKey = actor.getApiKey();
+
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                                .header("Authorization", "Bearer " + actorApiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
