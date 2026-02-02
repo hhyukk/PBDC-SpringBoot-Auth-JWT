@@ -37,9 +37,6 @@ public class ApiV1PostController {
     public List<PostDto> getItems() {
         List<Post> items = postService.findAll();
 
-        System.out.println("memberService : " + memberService);
-        System.out.println("rq : " + rq);
-        
         return items
                 .stream()
                 .map(PostDto::new)
