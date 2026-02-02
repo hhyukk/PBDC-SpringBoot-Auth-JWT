@@ -100,8 +100,8 @@ public class ApiV1PostControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.resultCode").value("400-1"))
                 .andExpect(jsonPath("$.msg").value("""
-                        contentt-NotBlank-must not be blank
-                        content-Size-size must be between 2 and 5000
+                        content-NotBlank-must not be blank
+                        content-Size-size must be between 2 and 500
                         """.stripIndent().trim()));
     }
 
