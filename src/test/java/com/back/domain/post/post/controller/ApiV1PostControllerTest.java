@@ -22,26 +22,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ActiveProfiles("test") // 테스트 환경에서는 test 프로파일을 활성화
-@SpringBootTest // 스프링부트 테스트 클래스임을 나타냄
-@AutoConfigureMockMvc // MockMvc를 자동으로 설정
-@Transactional // 각 테스트 메서드가 종료되면 롤백
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
 public class ApiV1PostControllerTest {
     @Autowired
-    private MockMvc mvc; // MockMvc를 주입
+    private MockMvc mvc;
     @Autowired
     private PostService postService;
     @Autowired
     private MemberService memberService;
 
-    //회원가입 테스트
     @Test
     @DisplayName("글 쓰기")
     void t1() throws Exception {
         Member actor = memberService.findByUsername("user1").get();
         String actorApiKey = actor.getApiKey();
 
-        // 회원가입 요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
@@ -54,10 +52,10 @@ public class ApiV1PostControllerTest {
                                         }
                                         """)
                 )
-                .andDo(print()); // 응답 결과 출력
+                .andDo(print());
 
         Post post = postService.findLatest().get();
-        // 201 Created 상태코드 검증
+
         resultActions
                 .andExpect(handler().handlerType(ApiV1PostController.class))
                 .andExpect(handler().methodName("write"))
@@ -71,7 +69,37 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.data.authorName").value(post.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.data.title").value("제목"))
                 .andExpect(jsonPath("$.data.content").value("내용"));
+    }
 
+    @Test
+    @DisplayName("글 쓰기, without title")
+    void t7() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .header("Authorization", "Bearer " + actorApiKey)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        title-NotBlank-must not be blank
+                        title-Size-size must be between 2 and 100
+                        """.stripIndent().trim()));
     }
 
     @Test
@@ -101,20 +129,21 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("400-1"))
                 .andExpect(jsonPath("$.msg").value("""
                         content-NotBlank-must not be blank
-                        content-Size-size must be between 2 and 500
+                        content-Size-size must be between 2 and 5000
                         """.stripIndent().trim()));
     }
 
     @Test
     @DisplayName("글 쓰기, with wrong json syntax")
     void t9() throws Exception {
+
         Member actor = memberService.findByUsername("user1").get();
         String actorApiKey = actor.getApiKey();
 
         String wrongJsonBody = """
                 {
-                    "title": "제목",
-                    "content": "내용"
+                    "title": 제목",
+                    content": "내용"
                 """;
 
         ResultActions resultActions = mvc
@@ -135,13 +164,38 @@ public class ApiV1PostControllerTest {
     }
 
     @Test
+    @DisplayName("글 쓰기, without authorization header")
+    void t10() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"))
+                .andExpect(jsonPath("$.msg").value("로그인 후 이용해주세요."));
+    }
+
+
+    @Test
     @DisplayName("글 수정")
     void t2() throws Exception {
         int id = 1;
         Post post = postService.findById(id).get();
         Member actor = post.getAuthor();
         String actorApiKey = actor.getApiKey();
-        // 회원가입 요청을 보냅니다.
+
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/" + id)
@@ -178,12 +232,15 @@ public class ApiV1PostControllerTest {
                                 .header("Authorization", "Bearer " + actorApiKey)
                 )
                 .andDo(print());
+
         resultActions
                 .andExpect(handler().handlerType(ApiV1PostController.class))
                 .andExpect(handler().methodName("delete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"));
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 글이 삭제되었습니다.".formatted(id)));
     }
+
 
     @Test
     @DisplayName("글 단건조회")
@@ -199,12 +256,14 @@ public class ApiV1PostControllerTest {
         Post post = postService.findById(id).get();
 
         resultActions
-                .andExpect(status().isOk())
                 .andExpect(handler().handlerType(ApiV1PostController.class))
                 .andExpect(handler().methodName("getItem"))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(post.getId()))
                 .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.authorId").value(post.getAuthor().getId()))
+                .andExpect(jsonPath("$.authorName").value(post.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.title").value(post.getTitle()))
                 .andExpect(jsonPath("$.content").value(post.getContent()));
     }
@@ -223,8 +282,11 @@ public class ApiV1PostControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ApiV1PostController.class))
                 .andExpect(handler().methodName("getItem"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("404-1"))
+                .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
     }
+
 
     @Test
     @DisplayName("글 다건조회")
@@ -241,7 +303,7 @@ public class ApiV1PostControllerTest {
                 .andExpect(handler().handlerType(ApiV1PostController.class))
                 .andExpect(handler().methodName("getItems"))
                 .andExpect(status().isOk())
-                .andExpect((jsonPath("$.length()").value(posts.size())));
+                .andExpect(jsonPath("$.length()").value(posts.size()));
 
         for (int i = 0; i < posts.size(); i++) {
             Post post = posts.get(i);
@@ -249,6 +311,8 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$[%d].id".formatted(i)).value(post.getId()))
                     .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].authorId".formatted(i)).value(post.getAuthor().getId()))
+                    .andExpect(jsonPath("$[%d].authorName".formatted(i)).value(post.getAuthor().getNickname()))
                     .andExpect(jsonPath("$[%d].title".formatted(i)).value(post.getTitle()))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
         }
