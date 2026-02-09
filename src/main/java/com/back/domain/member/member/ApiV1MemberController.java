@@ -73,8 +73,7 @@ public class ApiV1MemberController {
 
     @PostMapping("/login")
     public RsData<MemberLoginResBody> login(
-            @Valid @RequestBody MemberLoginReqBody reqBody,
-            HttpServletResponse response
+            @Valid @RequestBody MemberLoginReqBody reqBody
     ) {
         Member member = memberService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 아이디입니다."));
@@ -83,7 +82,7 @@ public class ApiV1MemberController {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
 
-        response.addCookie(new Cookie("apiKey", member.getApiKey()));
+        rq.setCookie("apiKey", member.getApiKey());
 
         return new RsData<>(
                 "200-1",
