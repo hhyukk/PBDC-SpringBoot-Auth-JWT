@@ -3,6 +3,7 @@ package com.back.global.rq;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import org.springframework.web.context.annotation.RequestScope;
 @RequiredArgsConstructor
 public class Rq {
     private final MemberService memberService;
-    private final HttpServletResponse req;
+    private final HttpServletRequest req;
 
     public Member getActor() {
         String headerAuthorization = req.getHeader("Authorization");
