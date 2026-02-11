@@ -1,5 +1,6 @@
 package com.back.domain.member.member.service;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.standard.util.Ut;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -21,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Transactional
 public class AuthTokenServiceTest {
+    @Autowired
+    private MemberService memberService;
     @Autowired
     private AuthTokenService authTokenService;
     private int expireSeconds = 60 * 60 * 24 * 365;
@@ -69,5 +72,17 @@ public class AuthTokenServiceTest {
         assertThat(jwt).isNotBlank();
 
         System.out.println("jwt = " + jwt);
+    }
+
+    @Test
+    @DisplayName("authTokenService.genAccessToken(member);")
+    void t4() {
+        Member memberUser1 = memberService.findByUsername("user1").get();
+
+        String accessToken = authTokenService.genAccessToken(memberUser1);
+
+        assertThat(accessToken).isNotBlank();
+
+        System.out.println("accessToken = " + accessToken);
     }
 }
