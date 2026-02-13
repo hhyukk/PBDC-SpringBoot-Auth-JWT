@@ -27,7 +27,7 @@ public class AuthTokenService {
         );
     }
 
-    Map<String, Object> payload(String secret, String accessToken) {
+    Map<String, Object> payload(String accessToken) {
         Map<String, Object> parsedPayload = Ut.jwt.payload(jwtSecretKey, accessToken);
 
         if (parsedPayload == null) return null;

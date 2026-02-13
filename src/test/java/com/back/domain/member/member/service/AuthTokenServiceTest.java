@@ -116,7 +116,7 @@ public class AuthTokenServiceTest {
 
         System.out.println("accessToken = " + accessToken);
 
-        Map<String, Object> parsedPayload = authTokenService.payload(jwtSecretKey, accessToken);
+        Map<String, Object> parsedPayload = authTokenService.payload(accessToken);
 
         assertThat(parsedPayload)
                 .containsAllEntriesOf(
