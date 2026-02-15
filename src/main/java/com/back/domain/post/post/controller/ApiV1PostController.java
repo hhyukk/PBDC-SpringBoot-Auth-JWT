@@ -77,7 +77,7 @@ public class ApiV1PostController {
             @Size(min = 2, max = 100)
             String title,
             @NotBlank
-            @Size(min = 2, max = 500)
+            @Size(min = 2, max = 5000)
             String content
     ) {
     }

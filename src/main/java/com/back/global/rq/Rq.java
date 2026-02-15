@@ -76,12 +76,12 @@ public class Rq {
                 .flatMap(
                         cookies ->
                                 Arrays.stream(cookies)
-                                        .filter(cookie -> cookie.getName().equals("apiKey"))
+                                        .filter(cookie -> cookie.getName().equals(name))
                                         .map(Cookie::getValue)
                                         .filter(value -> !value.isBlank())
                                         .findFirst()
                 )
-                .orElse("");
+                .orElse(defaultValue);
     }
 
     public void setCookie(String name, String value) {
