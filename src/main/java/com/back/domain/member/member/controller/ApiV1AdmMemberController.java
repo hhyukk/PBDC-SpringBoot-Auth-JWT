@@ -23,7 +23,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class ApiV1AdmMemberController {
     private final MemberService memberService;
-    private Rq rq;
+    private final Rq rq;
 
     @GetMapping
     public List<MemberWithUsernameDto> getItems() {
