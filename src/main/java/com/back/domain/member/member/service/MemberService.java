@@ -16,7 +16,7 @@ import java.util.Optional;
 public class MemberService {
     private final AuthTokenService authTokenService;
     private final MemberRepository memberRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public long count() {
         return memberRepository.count();
